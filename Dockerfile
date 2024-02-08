@@ -1,10 +1,17 @@
-# Use an official Node.js runtime as a base image
+# Use the official Node.js 14 image as the base
 FROM node:14
 
-# Set the working directory in the container
-WORKDIR /sandbox
+# Set the working directory inside the container to /workspace
+WORKDIR /workspace
 
-# No need to install dependencies unless your JS code requires them
-# RUN npm install some-package
+# (Optional) Install any commonly used packages globally; this step can be skipped if not needed
+# RUN npm install -g some-common-package
 
-# No CMD needed as we will use this container dynamically
+# Copy the script that will run the user code to the container
+COPY run-code.sh /workspace/run-code.sh
+
+# Make the script executable
+RUN chmod +x /workspace/run-code.sh
+
+# The script `run-code.sh` will be executed when the container starts (details below)
+CMD ["/workspace/run-code.sh"]
