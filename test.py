@@ -11,22 +11,15 @@ import json
 app = Flask(__name__)
 
 def get_installed_packages(target_path):
-    try:
-        # Execute 'npm list' in the target directory to get installed packages and their versions
-        result = subprocess.run(['npm', 'list', '--json'], cwd=target_path, capture_output=True, text=True, check=True)
-        # Parse the JSON output
-        output = json.loads(result.stdout)
-        # Extract and return dependencies and their versions
-        dependencies = output.get('dependencies', {})
-        return {pkg: details['version'] for pkg, details in dependencies.items()}
-    except subprocess.CalledProcessError as e:
-        # Handle errors (e.g., command failed to run)
-        print(f"Error getting installed packages: {e.stderr}")
-        return {}
-    except json.JSONDecodeError:
-        # Handle JSON parsing errors
-        print("Failed to parse npm list output as JSON.")
-        return {}
+    # Open and read the package-lock.json file
+    with open(f"{target_path}/package-lock.json", 'r') as f:
+        package_lock = json.load(f)  # Parse the file as JSON
+    
+    # Extract dependencies from the package-lock.json
+    dependencies = package_lock.get("dependencies", {})
+    
+    # Return a dictionary of package names and their versions
+    return {pkg: details["version"] for pkg, details in dependencies.items()}
 
 def generate_unique_execution_hash(user_code, package_json, user_id, chat_id):
     current_time = datetime.now().strftime("%Y%m%d%H%M%S")
